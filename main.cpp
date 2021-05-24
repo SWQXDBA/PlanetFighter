@@ -17,14 +17,13 @@ static int shootSpeed = 10;//玩家子弹发射速度 0-100 同时影响子弹飞行的速度
 static int enemyFreshTime=5;//多久刷新一次敌人
 static int enemyFreshCount=5;//每次刷新的敌人数量
 static int enemyMoveSpeed= 100;//越大敌人移动得越慢
-void flyBullets(vector<Bullet> &bs);
-void showBullets(vector<Bullet> &bs);
-void flushEnemy(Timer &t,vector<Enemy> &ems);
-void EnemyMove(vector<Enemy> &e);
-void clearEnemy();
-static int flushTime = 3;
-int main()
-{
+void flyBullets(vector<Bullet> &bs);//在循环中改变子弹的位置
+void showBullets(vector<Bullet> &bs);//显示子弹
+void flushEnemy(Timer &t,vector<Enemy> &ems);//刷新新的敌人 调用后不一定会刷新 需要满足enemyFreshTime的时间
+void EnemyMove(vector<Enemy> &e);//在循环中改变敌人的位置
+void clearEnemy();//在循环中判断哪些敌人该被“杀死”或者受到伤害
+static int flushTime = 3;//用于控制整体运行速度。每经过flushTime次后程序才会执行一次 低于3的时候会有明显拖拽感。
+int main() {
     // 初始化绘图窗口
     initgraph(2000, 1200);
 
@@ -32,81 +31,86 @@ int main()
     IMAGE playerBullet;//玩家子弹
 
 
-    loadimage(&playerBullet,R"(C:\Users\SWQXDBA\CLionProjects\EasyXTest\icons\bullet.png)",100,100);//加载玩家子弹图片
-    loadimage(&PlayerFighter,R"(C:\Users\SWQXDBA\CLionProjects\EasyXTest\icons\playerfighter.png)",100,100);//加载玩家飞机图片
-    loadimage(NULL,R"(C:\Users\SWQXDBA\AppData\Roaming\SpaceEngineers\Mods\cesha\icons\1111111111111111111111111.png)",raw,column);//加载背景图
+    loadimage(&playerBullet, R"(C:\Users\SWQXDBA\CLionProjects\EasyXTest\icons\bullet.png)", 100, 100);//加载玩家子弹图片
+    loadimage(&PlayerFighter, R"(C:\Users\SWQXDBA\CLionProjects\EasyXTest\icons\playerfighter.png)", 100,
+              100);//加载玩家飞机图片
+    loadimage(nullptr,
+              R"(C:\Users\SWQXDBA\AppData\Roaming\SpaceEngineers\Mods\cesha\icons\1111111111111111111111111.png)", raw,
+              column);//加载背景图
 
 
     Timer time;
     BeginBatchDraw();//开始批量绘图 用于缓存
-   while(true){
-       static int movetime=0;
-       MOUSEMSG option;
-       PeekMouseMsg( &option,true);
-
-       if(option.uMsg==WM_MOUSEMOVE){
-           movetime++;
-           //重置计时器
-           if(movetime>flushTime*100){
-               cout<<"重置了"<<endl;
-               movetime=0;
-           }
-           if(movetime%flushTime!=0){
-               continue;
-           }
-
-           //无论如何，让子弹飞一会儿
-           flyBullets(bullets);
-           //敌人随机移动
-           EnemyMove(enemys);
-           //间隔一段频率把玩家子弹加入刷新队列中
-           if(movetime!=0&&movetime%(flushTime*(100/shootSpeed))==0){
-               bullets.push_back(getPlayerBullet(option.x-50,option.y-90,playerBullet));
-           }
-
-           if(_kbhit())        //键盘输入值时
-           {
-               int key;
-               key = _getch();
-               if(key == 32)
-               {
-                   bullets.push_back(getPlayerBullet(option.x-120,option.y-90,playerBullet));
-                   bullets.push_back(getPlayerBullet(option.x+20,option.y-90,playerBullet));
-               }
-
-           }
-           //刷新敌人
-           flushEnemy(time,enemys);
-
-           //////////////////////////////////////////////////////////////////开始绘制//////////////////////////////////////////
-           cleardevice();//清理之前的内容
-           //加载背景图
-           loadimage(NULL,R"(C:\Users\SWQXDBA\AppData\Roaming\SpaceEngineers\Mods\cesha\icons\1111111111111111111111111.png)",2000,1200);
+    while (true) {
+        static int movetime = 0;
+        MOUSEMSG option;
+        PeekMouseMsg(&option, true);
+        movetime++;
 
 
-           //加载玩家飞机
-           putimage(option.x-50,option.y-50,&PlayerFighter);
 
-           clearEnemy();
-           //加载敌人飞机
-           for(auto i=enemys.begin();i<enemys.end();i++){
-               putimage(i->x,i->y,&i->picture);
-           }
+        //重置计时器 这两个if使得程序不会过快地进行
+        if (movetime > flushTime * 100) {
+            movetime = 0;
+        }
+        if (movetime % flushTime != 0) {
+            continue;
+        }
 
-           //遍历容器 加载所有弹道
-           showBullets(bullets);
-           //执行未完成的绘制任务
-           FlushBatchDraw();
-           continue;
-       }
-       if(option.uMsg==WM_MBUTTONDOWN){
-        return 0;
+        //无论如何，让子弹飞一会儿
+        flyBullets(bullets);
+        //敌人随机移动
+        EnemyMove(enemys);
+        //间隔一段频率把玩家子弹加入刷新队列中
+        if (movetime != 0 && movetime % (flushTime * (100 / shootSpeed)) == 0) {
+            bullets.push_back(getPlayerBullet(option.x - 50, option.y - 90, playerBullet));
+        }
 
-       }
-   }
-    closegraph();
+        if (_kbhit())        //键盘输入值时
+        {
+            int key;
+            key = _getch();
+            //空格
+            if (key == 32) {
+                bullets.push_back(getPlayerBullet(option.x - 120, option.y - 90, playerBullet));
+                bullets.push_back(getPlayerBullet(option.x + 20, option.y - 90, playerBullet));
+            }
+            //esc
+            if (key == 27) {
+                closegraph();
+                break;
+            }
+
+        }
+        //刷新敌人
+        flushEnemy(time, enemys);
+        //清理敌人
+        clearEnemy();
+        //////////////////////////////////////////////////////////////////开始绘制//////////////////////////////////////////
+        cleardevice();//清理之前的内容
+        //加载背景图
+        loadimage(nullptr,
+                  R"(C:\Users\SWQXDBA\AppData\Roaming\SpaceEngineers\Mods\cesha\icons\1111111111111111111111111.png)",
+                  2000, 1200);
+
+
+        //加载玩家飞机
+        putimage(option.x - 50, option.y - 50, &PlayerFighter);
+
+
+        //加载敌人飞机
+        for (auto i = enemys.begin(); i < enemys.end(); i++) {
+            putimage(i->x, i->y, &i->picture);
+        }
+
+        //遍历容器 加载所有弹道
+        showBullets(bullets);
+        //执行未完成的绘制任务
+        FlushBatchDraw();
+        continue;
+
+    }
 }
-
 void flyBullets(vector<Bullet> &bs){
     if(bs.empty())
         return;
