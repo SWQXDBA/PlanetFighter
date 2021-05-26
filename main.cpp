@@ -234,6 +234,7 @@ bool clearEnemy(PlayerFighter &playerFighter) {
                         }
                     }
                     j = bullets.erase(j);
+                    //要删除碰撞过的子弹
                     if (j > bullets.begin() && !bullets.empty()){
                         j--;
                     }
@@ -246,13 +247,19 @@ bool clearEnemy(PlayerFighter &playerFighter) {
         }else{
             if (abs(j->x - playerFighter.x) < raw/screan && abs(j->y - playerFighter.y) < raw/screan){
                 playerFighter.HP-=j->ATTACK;
+                //要删除碰撞过的子弹
                 j=bullets.erase(j);
                 if(j>bullets.begin()&&!bullets.empty()){
                     j--;
                 }else{
+                    //如果最后一发打死了玩家 则返回false
+                    if(playerFighter.isDead()){
+                        return false;
+                    }
                     return true;
                 }
             }
+            //判断玩家还有没有血
             if(playerFighter.isDead()){
                return false;
             }
