@@ -1,39 +1,36 @@
 #include <iostream>
 #include <graphics.h>
 #include <conio.h>
-#include "model.h"
 #include "vector"
 #include <windows.h>
 #include "iterator"
-#include "Enemy.h"
-
+#include "model.h"
 using namespace std;
-static int raw = 2000;
-static int column = 1200;
+static string path = "C:\\Users\\SWQXDBA2\\CLionProjects\\PlanetFighter\\icons";
+static int raw = 1000;
+static int column = 500;
+static int screan = 20;// raw/screan作为图片的大小
 static vector<Bullet> bullets;
 static vector<Enemy> enemys;
-static int maxBullets=20;
-static int shootSpeed = 10;//玩家子弹发射速度 0-100 同时影响子弹飞行的速度
-static int enemyFreshTime=5;//多久刷新一次敌人
-static int enemyFreshCount=5;//每次刷新的敌人数量
-static int enemyMoveSpeed= 100;//越大敌人移动得越慢
+static int maxBullets = 20;
+static int shootSpeed = 1;//玩家子弹发射速度 0-100 同时影响子弹飞行的速度
+static int enemyFreshTime = 3;//多久刷新一次敌人
+static int enemyFreshCount = 2;//每次刷新的敌人数量
+static int enemyMoveSpeed = 1;//越大敌人移动得越慢
 void flyBullets(vector<Bullet> &bs);//在循环中改变子弹的位置
 void showBullets(vector<Bullet> &bs);//显示子弹
-void flushEnemy(Timer &t,vector<Enemy> &ems);//刷新新的敌人 调用后不一定会刷新 需要满足enemyFreshTime的时间
+void flushEnemy(Timer &t, vector<Enemy> &ems);//刷新新的敌人 调用后不一定会刷新 需要满足enemyFreshTime的时间
 void EnemyMove(vector<Enemy> &e);//在循环中改变敌人的位置
 void clearEnemy();//在循环中判断哪些敌人该被“杀死”或者受到伤害
 static int flushTime = 3;//用于控制整体运行速度。每经过flushTime次后程序才会执行一次 低于3的时候会有明显拖拽感。
 int main() {
     // 初始化绘图窗口
-    initgraph(2000, 1200);
-
+    initgraph(raw, column);
+    BulletFactory bulletFactory;
     IMAGE PlayerFighter;//玩家飞机
-    IMAGE playerBullet;//玩家子弹
 
-
-    loadimage(&playerBullet, R"(C:\Users\SWQXDBA\CLionProjects\EasyXTest\icons\bullet.png)", 100, 100);//加载玩家子弹图片
-    loadimage(&PlayerFighter, R"(C:\Users\SWQXDBA\CLionProjects\EasyXTest\icons\playerfighter.png)", 100,
-              100);//加载玩家飞机图片
+    loadimage(&PlayerFighter, (path+"\\playerfighter.png").c_str(), raw/screan,
+              raw/screan);//加载玩家飞机图片
     loadimage(nullptr,
               R"(C:\Users\SWQXDBA\AppData\Roaming\SpaceEngineers\Mods\cesha\icons\1111111111111111111111111.png)", raw,
               column);//加载背景图
@@ -63,7 +60,13 @@ int main() {
         EnemyMove(enemys);
         //间隔一段频率把玩家子弹加入刷新队列中
         if (movetime != 0 && movetime % (flushTime * (100 / shootSpeed)) == 0) {
-            bullets.push_back(getPlayerBullet(option.x - 50, option.y - 90, playerBullet));
+            bullets.push_back(bulletFactory.getPlayerBullet(option.x - 50, option.y - 90, 0));
+            for(auto i=enemys.begin();i<enemys.end();i++){
+                int c1=bullets.size();
+                i->shoot(bullets,1,bulletFactory.getEnemyBulletByType(i->x,i->y+50,0,2));
+                int c2=bullets.size();
+            }
+
         }
 
         if (_kbhit())        //键盘输入值时
@@ -72,8 +75,8 @@ int main() {
             key = _getch();
             //空格
             if (key == 32) {
-                bullets.push_back(getPlayerBullet(option.x - 120, option.y - 90, playerBullet));
-                bullets.push_back(getPlayerBullet(option.x + 20, option.y - 90, playerBullet));
+                bullets.push_back(bulletFactory.getPlayerBullet(option.x - 120, option.y - 90, 0));
+                bullets.push_back(bulletFactory.getPlayerBullet(option.x + 20, option.y - 90, 0));
             }
             //esc
             if (key == 27) {
@@ -91,7 +94,7 @@ int main() {
         //加载背景图
         loadimage(nullptr,
                   R"(C:\Users\SWQXDBA\AppData\Roaming\SpaceEngineers\Mods\cesha\icons\1111111111111111111111111.png)",
-                  2000, 1200);
+                  raw, column);
 
 
         //加载玩家飞机
@@ -111,78 +114,84 @@ int main() {
 
     }
 }
-void flyBullets(vector<Bullet> &bs){
-    if(bs.empty())
+
+void flyBullets(vector<Bullet> &bs) {
+    if (bs.empty())
         return;
-    for(auto i=bs.begin();i<bs.end();i++){
-        i->x+=(i->xmove*(1+shootSpeed/3));
-        i->y+=(i->ymove*(1+shootSpeed/3));
+    for (auto i = bs.begin(); i < bs.end(); i++) {
+        i->bulletFly();
     }
-    for(auto i=bs.begin();i<bs.end();i++){
-        if(i->x<0||i->y<0){
-          i= bs.erase(i);
-          if(i>bs.begin()&&!bs.empty()){
-              i--;
-          }else{
-              break;
-          }
+    //清理触碰了屏幕边缘的子弹
+    for (auto i = bs.begin(); i < bs.end(); i++) {
+        if (i->x < 0 || i->y < 0) {
+            i = bs.erase(i);
+            if (i > bs.begin() && !bs.empty()) {
+                i--;
+            } else {
+                break;
+            }
         }
     }
 }
-void showBullets(vector<Bullet> &bs){
-    for(auto i=bs.begin();i<bs.end();i++){
-        putimage(i->x,i->y,&i->picture);
+
+void showBullets(vector<Bullet> &bs) {
+    for (auto i = bs.begin(); i < bs.end(); i++) {
+        putimage(i->x, i->y, &i->picture);
     }
 }
-void flushEnemy(Timer &t,vector<Enemy> &ems){
-    if(t.passedtime(enemyFreshTime)){
-        for(int i=0;i<enemyFreshCount;i++){
+
+void flushEnemy(Timer &t, vector<Enemy> &ems) {
+    if (t.passedtime(enemyFreshTime)) {
+        for (int i = 0; i < enemyFreshCount; i++) {
             IMAGE enemyFighter;//敌人飞机
-            loadimage(&enemyFighter,R"(C:\Users\SWQXDBA\CLionProjects\EasyXTest\icons\enemyfighter.png)",100,100);//加载敌人飞机
-            int X = 200+rand()%1600;
-            int Y = 150+rand()%500;
-            Enemy n= Enemy();
-            n.x=X;
-            n.y=Y;
-            n.HP=10;
-            n.speed=enemyMoveSpeed;
+            loadimage(&enemyFighter, (path+"\\enemyfighter.png").c_str(), raw/screan,
+                      raw/screan);//加载敌人飞机
+            int X = rand() % raw;
+            int Y = rand() % (column/2);
+            Enemy n = Enemy();
+            n.x = X;
+            n.y = Y;
+            n.HP = 10;
+            n.movetoX = rand() % raw ;
+            n.movetoY = rand() % (column/2);
+            n.speed = enemyMoveSpeed;
             n.picture = enemyFighter;
             ems.push_back(n);
         }
     }
 }
-void EnemyMove(vector<Enemy> &e){
-    for(auto i = e.begin();i<e.end();i++) {
+
+void EnemyMove(vector<Enemy> &e) {
+    for (auto i = e.begin(); i < e.end(); i++) {
         i->move();
     }
 }
-void clearEnemy(){
-    for(auto j=bullets.begin();j<bullets.end();j++){
-        for(auto i=enemys.begin();i<enemys.end();i++){
-            //判断撞击
-            if(abs(j->x-i->x) <100&&abs(j->y-i->y) <100){
-                //进行扣血
-                i->HP-=j->ATTACK;
-                if(i->HP<=0){
-                    //如果没血了 删除
-                    i=enemys.erase(i);
-                    if(i>enemys.begin()&&enemys.size()>0){
-                        i--;
-                    }else{
-                        return;
+
+void clearEnemy() {
+    for (auto j = bullets.begin(); j < bullets.end(); j++) {
+        for (auto i = enemys.begin(); i < enemys.end(); i++) {
+            if(j->from==0){
+                //判断撞击
+                if (abs(j->x - i->x) < raw/screan && abs(j->y - i->y) < raw/screan) {
+                    //进行扣血
+                    i->HP -= j->ATTACK;
+                    if (i->HP <= 0) {
+                        //如果没血了 删除
+                        i = enemys.erase(i);
+                        if (i > enemys.begin() && enemys.size() > 0) {
+                            i--;
+                        } else {
+                            return;
+                        }
                     }
-
+                    j = bullets.erase(j);
+                    if (j > bullets.begin() && !bullets.empty())
+                        j--;
+                    else
+                        return;
                 }
-                j=bullets.erase(j);
-                if(j>bullets.begin()&&!bullets.empty())
-                    j--;
-                else
-                    return;
-
-
-
-
             }
+
         }
     }
 
