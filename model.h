@@ -16,6 +16,7 @@
 #include <conio.h>
 #include<vector>
 #include<cmath>
+
 using namespace std;
 extern int raw;
 extern int column;
@@ -24,7 +25,7 @@ extern int shootSpeed;
 extern int screan;
 
 extern int leftMargin;
-extern int rightMargin ;
+extern int rightMargin;
 extern int topMargin;
 extern int bottomMargin;
 
@@ -50,7 +51,7 @@ public:
 class Bullet {
 public:
     static vector<IMAGE> playBulletIMAGEs;
-    int from ;//0 玩家发射的 1 敌人发射的
+    int from;//0 玩家发射的 1 敌人发射的
     IMAGE picture;
     int x;
     int y;
@@ -58,9 +59,10 @@ public:
     int ymove;
     int speed = 1;
     int ATTACK = 3;
-    void bulletFly(){
-        x+= (xmove * (1 + speed / screan));
-        y+= (ymove * (1 + speed / screan));
+
+    void bulletFly() {
+        x += (xmove * (1 + speed / screan));
+        y += (ymove * (1 + speed / screan));
     }
 };
 
@@ -68,15 +70,16 @@ class BulletFactory {
 public:
     vector<IMAGE> playBulletIMAGEs;
     vector<IMAGE> enemyBulletIMAGEs;
+
     BulletFactory() {
 
         IMAGE pi1;
-        loadimage(&pi1, (path + "\\bullet.png").c_str(), raw/screan, raw/screan);
+        loadimage(&pi1, (path + "\\bullet.png").c_str(), raw / screan, raw / screan);
         playBulletIMAGEs.push_back(pi1);
 
 
         IMAGE ei1;
-        loadimage(&ei1, (path + "\\bullet.png").c_str(), raw/screan, raw/screan);
+        loadimage(&ei1, (path + "\\bullet.png").c_str(), raw / screan, raw / screan);
         enemyBulletIMAGEs.push_back(ei1);
     }
 
@@ -85,22 +88,21 @@ public:
         nBullet.picture = playBulletIMAGEs[loc];
         nBullet.x = X;
         nBullet.y = Y;
-        nBullet.speed=shootSpeed;
-        nBullet.from=0;
+        nBullet.speed = shootSpeed;
+        nBullet.from = 0;
         nBullet.xmove = 0;
         nBullet.ymove = -5;
         return nBullet;
     }
 
 
-
-    Bullet getEnemyBulletByType(int X, int Y, int loc,int speed) {
+    Bullet getEnemyBulletByType(int X, int Y, int loc, int speed) {
         Bullet nBullet;
         nBullet.picture = playBulletIMAGEs[loc];
         nBullet.x = X;
         nBullet.y = Y;
-        nBullet.from=1;
-        nBullet.speed=speed;
+        nBullet.from = 1;
+        nBullet.speed = speed;
         nBullet.xmove = 0;
         nBullet.ymove = 5;
         return nBullet;
@@ -123,30 +125,29 @@ public:
 
     void move() {
 
-        if ((abs(movetoX-x) <=(raw/screan))&&(abs(movetoY-y) <=(raw/screan))) {
-            if(moveTimer.passedtime(2)){
-                movetoX = leftMargin+ rand() % raw ;
-                movetoY = topMargin+ rand() % (column/2);
-            }else{
+        if ((abs(movetoX - x) <= (raw / screan)) && (abs(movetoY - y) <= (raw / screan))) {
+            if (moveTimer.passedtime(2)) {
+                movetoX = leftMargin + rand() % raw;
+                movetoY = topMargin + rand() % (column / 2);
+            } else {
                 return;
             }
         }
 
-        if(abs(movetoX-x) >raw/screan){
-            if((movetoX - x)>=0){
-                x+=speed;
-            }else{
-                x-=speed;
+        if (abs(movetoX - x) > raw / screan) {
+            if ((movetoX - x) >= 0) {
+                x += speed;
+            } else {
+                x -= speed;
             }
         }
-        if(abs(movetoY-y) >=raw/screan){
-            if(movetoY - y>0){
-                y +=speed;
-            }else{
-                y -=speed;
+        if (abs(movetoY - y) >= raw / screan) {
+            if (movetoY - y > 0) {
+                y += speed;
+            } else {
+                y -= speed;
             }
         }
-
 
 
     }
@@ -155,7 +156,7 @@ public:
         return HP <= 0;
     }
 
-    void shoot(vector<Bullet> &bullets, int time, const Bullet& bullet) {
+    void shoot(vector<Bullet> &bullets, int time, const Bullet &bullet) {
         if (shootTimer.passedtime(time)) {
             bullets.push_back(bullet);
         }
@@ -168,9 +169,9 @@ public:
     PlayerFighter(int hp, int attack) : HP(hp), Attack(attack) {}
 
     IMAGE picture;
-    int x=0;
-    int y=0;
-    int HP=0;
+    int x = 0;
+    int y = 0;
+    int HP = 0;
     int Attack;
 
     bool isDead() {
