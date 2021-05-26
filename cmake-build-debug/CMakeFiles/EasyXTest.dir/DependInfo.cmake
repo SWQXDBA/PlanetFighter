@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "C:/Users/SWQXDBA2/CLionProjects/PlanetFighter/main.cpp" "C:/Users/SWQXDBA2/CLionProjects/PlanetFighter/cmake-build-debug/CMakeFiles/EasyXTest.dir/main.cpp.obj"
+  "C:/Users/SWQXDBA/CLionProjects/EasyXTest/main.cpp" "C:/Users/SWQXDBA/CLionProjects/EasyXTest/cmake-build-debug/CMakeFiles/EasyXTest.dir/main.cpp.obj"
   )
 set(CMAKE_CXX_COMPILER_ID "MSVC")
 

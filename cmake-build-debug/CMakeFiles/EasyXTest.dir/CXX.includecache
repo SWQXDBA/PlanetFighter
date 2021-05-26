@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-C:/Users/SWQXDBA2/CLionProjects/PlanetFighter/main.cpp
+C:/Users/SWQXDBA/CLionProjects/EasyXTest/main.cpp
 iostream
 -
 graphics.h
@@ -14,15 +14,17 @@ graphics.h
 conio.h
 -
 vector
-C:/Users/SWQXDBA2/CLionProjects/PlanetFighter/vector
+C:/Users/SWQXDBA/CLionProjects/EasyXTest/vector
 windows.h
 -
 iterator
-C:/Users/SWQXDBA2/CLionProjects/PlanetFighter/iterator
+C:/Users/SWQXDBA/CLionProjects/EasyXTest/iterator
 model.h
-C:/Users/SWQXDBA2/CLionProjects/PlanetFighter/model.h
+C:/Users/SWQXDBA/CLionProjects/EasyXTest/model.h
+sstream
+C:/Users/SWQXDBA/CLionProjects/EasyXTest/sstream
 
-C:/Users/SWQXDBA2/CLionProjects/PlanetFighter/model.h
+C:/Users/SWQXDBA/CLionProjects/EasyXTest/model.h
 iostream
 -
 graphics.h

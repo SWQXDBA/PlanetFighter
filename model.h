@@ -22,6 +22,12 @@ extern int column;
 extern string path;
 extern int shootSpeed;
 extern int screan;
+
+extern int leftMargin;
+extern int rightMargin ;
+extern int topMargin;
+extern int bottomMargin;
+
 class Timer {
     //定时器
     time_t lasttime;
@@ -118,10 +124,9 @@ public:
     void move() {
 
         if ((abs(movetoX-x) <=(raw/screan))&&(abs(movetoY-y) <=(raw/screan))) {
-            cout<<"开始移动了"<<endl;
             if(moveTimer.passedtime(2)){
-                movetoX = rand() % raw ;
-                movetoY = rand() % (column/2);
+                movetoX = leftMargin+ rand() % raw ;
+                movetoY = topMargin+ rand() % (column/2);
             }else{
                 return;
             }
@@ -158,12 +163,14 @@ public:
 };
 
 
-class playerFighter {
+class PlayerFighter {
 public:
+    PlayerFighter(int hp, int attack) : HP(hp), Attack(attack) {}
+
     IMAGE picture;
-    int x;
-    int y;
-    int HP;
+    int x=0;
+    int y=0;
+    int HP=0;
     int Attack;
 
     bool isDead() {
