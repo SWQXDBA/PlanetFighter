@@ -12,15 +12,15 @@
 #include <conio.h>
 #include <ctime>
 #include <iostream>
-#include <graphics.h>
-#include <conio.h>
 #include<vector>
 #include<cmath>
 
 using namespace std;
+extern vector<IMAGE> bulletImages;
+extern vector<IMAGE> enemyEmages;
 extern int raw;
 extern int column;
-extern string path;
+extern string MainPath;
 extern int shootSpeed;
 extern int screan;
 
@@ -28,29 +28,38 @@ extern int leftMargin;
 extern int rightMargin;
 extern int topMargin;
 extern int bottomMargin;
+extern int enemyMoveSpeed;
 
 class Timer {
     //定时器
-    time_t lasttime;
+    clock_t lasttime = 0;
+    clock_t gettedlasttime = 0;
 public:
-    bool passedtime(int s) {
+    bool passedtime(int ms) {
         if (lasttime == 0) {
-            lasttime = time(nullptr);
+            lasttime = clock();
             return true;
         }
-        time_t nowtime = time(nullptr);
-        if (nowtime - lasttime >= s) {
-            lasttime = nowtime;
+
+        clock_t nowTime = clock();
+        if (nowTime - lasttime >= ms) {
+            lasttime = nowTime;
             return true;
         }
         return false;
+    }
+
+    int getPassedTime() {
+        clock_t now = clock();
+        clock_t t = now - gettedlasttime;
+        gettedlasttime = now;
+        return t;
     }
 };
 
 
 class Bullet {
 public:
-    static vector<IMAGE> playBulletIMAGEs;
     int from;//0 玩家发射的 1 敌人发射的
     IMAGE picture;
     int x;
@@ -64,49 +73,14 @@ public:
         x += (xmove * (1 + speed / screan));
         y += (ymove * (1 + speed / screan));
     }
-};
 
-class BulletFactory {
-public:
-    vector<IMAGE> playBulletIMAGEs;
-    vector<IMAGE> enemyBulletIMAGEs;
-
-    BulletFactory() {
-
-        IMAGE pi1;
-        loadimage(&pi1, (path + "\\bullet.png").c_str(), raw / screan, raw / screan);
-        playBulletIMAGEs.push_back(pi1);
-
-
-        IMAGE ei1;
-        loadimage(&ei1, (path + "\\bullet.png").c_str(), raw / screan, raw / screan);
-        enemyBulletIMAGEs.push_back(ei1);
-    }
-
-    Bullet getPlayerBullet(int X, int Y, int loc) {
-        Bullet nBullet;
-        nBullet.picture = playBulletIMAGEs[loc];
-        nBullet.x = X;
-        nBullet.y = Y;
-        nBullet.speed = shootSpeed;
-        nBullet.from = 0;
-        nBullet.xmove = 0;
-        nBullet.ymove = -5;
-        return nBullet;
-    }
-
-
-    Bullet getEnemyBulletByType(int X, int Y, int loc, int speed) {
-        Bullet nBullet;
-        nBullet.picture = playBulletIMAGEs[loc];
-        nBullet.x = X;
-        nBullet.y = Y;
-        nBullet.from = 1;
-        nBullet.speed = speed;
-        nBullet.xmove = 0;
-        nBullet.ymove = 5;
-        return nBullet;
-    }
+    Bullet(int from, const IMAGE &picture, int x, int y, int xmove, int ymove, int speed, int attack) : from(from),
+                                                                                                        picture(picture),
+                                                                                                        x(x), y(y),
+                                                                                                        xmove(xmove),
+                                                                                                        ymove(ymove),
+                                                                                                        speed(speed),
+                                                                                                        ATTACK(attack) {}
 };
 
 
@@ -122,11 +96,12 @@ public:
     int movetoX;
     int movetoY;
     int speed = 20;
+    vector<Bullet> myBullets;
 
     void move() {
 
         if ((abs(movetoX - x) <= (raw / screan)) && (abs(movetoY - y) <= (raw / screan))) {
-            if (moveTimer.passedtime(2)) {
+            if (moveTimer.passedtime(2000)) {
                 movetoX = leftMargin + rand() % raw;
                 movetoY = topMargin + rand() % (column / 2);
             } else {
@@ -156,17 +131,105 @@ public:
         return HP <= 0;
     }
 
-    void shoot(vector<Bullet> &bullets, int time, const Bullet &bullet) {
+    void shoot(vector<Bullet> &bullets, int time) {
         if (shootTimer.passedtime(time)) {
-            bullets.push_back(bullet);
+            for (auto i = myBullets.begin(); i < myBullets.end(); i++) {
+                Bullet b = *i;
+                b.x = x;
+                b.y = y;
+                bullets.push_back(b);
+            }
         }
     }
 };
 
+class EnemyFactory {
+    vector<Enemy> All;
+public:
+    Enemy getEnemy(int loc) {
+        return All[loc];
+    }
+
+    Enemy getEnemy(int loc, int hp, int attack) {
+        Enemy e = All[loc];
+        e.HP = hp;
+        e.Attack = attack;
+        return e;
+    }
+
+    EnemyFactory() {
+//设置敌人种类1
+        Enemy n = Enemy();
+        loadimage(&n.picture, (MainPath + "\\enemy\\b1.png").c_str(), raw / screan,
+                  raw / screan);//加载敌人飞机
+        int X = leftMargin + rand() % raw;
+        int Y = topMargin + rand() % (column / 2);
+        n.x = X;
+        n.y = Y;
+        n.HP = 10;
+        n.movetoX = leftMargin + rand() % raw;
+        n.movetoY = topMargin + rand() % (column / 2);
+        n.Attack = 3;
+        n.speed = enemyMoveSpeed;
+        Bullet b = Bullet(1, bulletImages[0], X, Y, 0, 5, n.speed, n.Attack);
+        n.myBullets.push_back(b);
+        All.push_back(n);
+
+
+        //////
+
+//设置敌人种类2
+        loadimage(&n.picture, (MainPath + "\\enemy\\b2.png").c_str(), raw / screan,
+                  raw / screan);//加载敌人飞机
+        X = leftMargin + rand() % raw;
+        Y = topMargin + rand() % (column / 2);
+        n.x = X;
+        n.y = Y;
+        n.HP = 20;
+        n.movetoX = leftMargin + rand() % raw;
+        n.movetoY = topMargin + rand() % (column / 2);
+        n.Attack = 10;
+        n.speed = enemyMoveSpeed * 1.5;
+        n.myBullets.clear();
+
+        b = Bullet(1, bulletImages[0], X, Y, -2, 5, n.speed, n.Attack);
+
+        n.myBullets.push_back(b);
+
+        b = Bullet(1, bulletImages[0], X, Y, 2, 5, n.speed, n.Attack);
+        n.myBullets.push_back(b);
+        All.push_back(n);
+
+
+        //设置敌人种类3
+        //BOSS
+        loadimage(&n.picture, (MainPath + "\\enemy\\b3.png").c_str(), raw / screan,
+                  raw / screan);//加载敌人飞机
+        X = leftMargin + rand() % raw;
+        Y = topMargin + rand() % (column / 2);
+        n.x = X;
+        n.y = Y;
+        n.HP = 20;
+        n.movetoX = leftMargin + rand() % raw;
+        n.movetoY = topMargin + rand() % (column / 2);
+        n.Attack = 15;
+        n.speed = enemyMoveSpeed * 2;
+        n.myBullets.clear();
+        b = Bullet(1, bulletImages[2], X, Y, -3, 7, n.speed, n.Attack);
+        n.myBullets.push_back(b);
+        b = Bullet(1, bulletImages[2], X, Y, 0, 7, n.speed, n.Attack);
+        n.myBullets.push_back(b);
+        b = Bullet(1, bulletImages[2], X, Y, 3, 7, n.speed, n.Attack);
+        n.myBullets.push_back(b);
+        All.push_back(n);
+    }
+};
 
 class PlayerFighter {
 public:
     PlayerFighter(int hp, int attack) : HP(hp), Attack(attack) {}
+
+    PlayerFighter() {}
 
     IMAGE picture;
     int x = 0;

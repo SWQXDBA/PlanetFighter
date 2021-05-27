@@ -6,161 +6,246 @@
 #include "iterator"
 #include "model.h"
 #include "sstream"
+#include "checkpoint.h"
 
 using namespace std;
-static string path = "C:\\Users\\SWQXDBA\\CLionProjects\\EasyXTest\\icons";
-static int raw = 2000;
-static int column = 1000;
+static string MainPath = "C:\\Users\\SWQXDBA2\\CLionProjects\\PlanetFighter\\icons";
+static int raw = 1000;
+static int column = 750;
 static int screan = 20;// raw/screan作为图片的大小
 
 //设置外边距
-static int leftMargin = screan * 5;
-static int rightMargin = screan * 5;
-static int topMargin = screan * 5;
-static int bottomMargin = screan * 5;
+static int leftMargin = screan * 10;
+static int rightMargin = screan * 5 * 0;
+static int topMargin = screan * 5 * 0;
+static int bottomMargin = screan * 5 * 0;
 
-
+static vector<IMAGE> bulletImages;
+static vector<IMAGE> enemyEmages;
 static vector<Bullet> bullets;
 static vector<Enemy> enemys;
-static int maxBullets = 20;
-static int shootSpeed = 2;//玩家子弹发射速度 0-100 同时影响子弹飞行的速度
-static int enemyFreshTime = 2;//多久刷新一次敌人
-static int enemyFreshCount = 2;//每次刷新的敌人数量
+static EnemyFactory *enemyFactory;
+static int shootSpeed = 7;//玩家子弹发射速度 0-100 同时影响子弹飞行的速度
 static int enemyMoveSpeed = 2;//越大敌人移动得越快
 
 
 
+inline void showDetails(int x, int y, int cnt, string message);
+
+inline void showDetails(int x, int y, double cnt, string message);
 
 void flyBullets(vector<Bullet> &bs);//在循环中改变子弹的位置
 void showBullets(vector<Bullet> &bs);//显示子弹
-void flushEnemy(Timer &t, vector<Enemy> &ems);//刷新新的敌人 调用后不一定会刷新 需要满足enemyFreshTime的时间
+bool flushEnemy(Timer &t, vector<Enemy> &ems, Checkpoint &checkpoint);//刷新新的敌人 false:游戏还未结束 true:玩家获胜
 void EnemyMove(vector<Enemy> &e);//在循环中改变敌人的位置
-bool clearEnemy(PlayerFighter &playerFighter);//在循环中判断哪些敌人该被“杀死”或者受到伤害 同时清算玩家受到的伤害 玩家没hp时返回false
-static int flushTime = 5;//用于控制整体运行速度。每经过flushTime次后程序才会执行一次 低于3的时候会有明显拖拽感。
+bool clearEnemy(Checkpoint &checkpoint);//在循环中判断哪些敌人该被“杀死”或者受到伤害 同时清算玩家受到的伤害 玩家没hp时返回false
+int menu();//显示菜单
+bool run(Checkpoint &checkpoint);//主程序
+static int flushTime = 1000 / 100;//用于控制整体运行速度。单位毫秒
+static int screanflushTime = 1000 / 60;//帧数上限 单位毫秒
+
+
+
+
+void init() {
+//初始化弹道组
+    IMAGE pi;
+    loadimage(&pi, (MainPath + "\\bullet\\b1.png").c_str(), raw / screan, raw / screan);
+    bulletImages.push_back(pi);
+    loadimage(&pi, (MainPath + "\\bullet\\b2.png").c_str(), raw / screan, raw / screan);
+    bulletImages.push_back(pi);
+    loadimage(&pi, (MainPath + "\\bullet\\b3.png").c_str(), raw / screan, raw / screan);
+    bulletImages.push_back(pi);
+    enemyFactory = new EnemyFactory();
+}
+
 int main() {
+    init();
     // 初始化绘图窗口
     initgraph(raw + leftMargin + rightMargin, column + topMargin + bottomMargin);
-    BulletFactory bulletFactory;//用于生成子弹
-    PlayerFighter playerFighter(100, 3);//生成玩家飞机
-    loadimage(&playerFighter.picture, (path + "\\playerfighter.png").c_str(), raw / screan,
-              raw / screan);//加载玩家飞机图片
+    BeginBatchDraw();//开始批量绘图 用于缓存
+    while (true) {
+
+        Checkpoint checkpoint(menu(), *enemyFactory);
+        if (run(checkpoint)) {
+            cleardevice();//清理之前的内容
+            settextcolor(0x0000AA);
+            settextstyle(screan * 2, 0, _T("Consolas"));
+            outtextxy(leftMargin, column / 2, "恭喜获胜 按下空格继续游戏，esc关闭游戏");
+            FlushBatchDraw();
+        } else {
+            cleardevice();//清理之前的内容
+            settextcolor(0x0000AA);
+            settextstyle(screan * 2, 0, _T("Consolas"));
+            outtextxy(leftMargin, column / 2, "您失败了! 按下空格继续游戏，esc关闭游戏");
+            FlushBatchDraw();
+        }
+        while (true) {
+            if (_kbhit())        //键盘输入值时
+            {
+                int key;
+                key = _getch();
+                //空格
+                if (key == 32) {
+                    break;
+                }
+                //esc
+                if (key == 27) {
+                    closegraph();
+                    return 0;
+                }
+            }
+        }
+
+
+    }
+
+
+}
+
+bool run(Checkpoint &checkpoint) {
+
 
     //加载背景图
     IMAGE B;
-
     loadimage(&B,
-              (path + "\\background1.png").c_str(),
+              (MainPath + "\\background1.png").c_str(),
               raw, column);
     putimage(leftMargin, topMargin, &B);
+    //关卡
 
 
     Timer time;
-    BeginBatchDraw();//开始批量绘图 用于缓存
 
 
-    ///////////本程序以鼠标信号作为频率 程序会不断读取鼠标信号 所有操作建立在鼠标信号接收次数的基础上进行////////////////////
+
+//主逻辑循环
 
     while (true) {
-        static int movetime;
-        movetime++;
+
+        static Timer mainTime;
 
         //接收鼠标信号
         static MOUSEMSG option;
-        PeekMouseMsg(&option, true);
-
-        //重置计时器 这两个if使得程序不会过快地进行
-        if (movetime > flushTime * 100) {
-            movetime = 0;
-        }
-        if (movetime % flushTime != 0) {
-            continue;
+        while (MouseHit()) {
+            PeekMouseMsg(&option, true);
         }
 
-        //玩家飞机的位置 处理边缘情况
-        if (option.x - raw / screan / 2 <= leftMargin)
-            playerFighter.x = leftMargin;
-        else if (option.x - raw / screan / 2 >= leftMargin + raw - raw / screan)
-            playerFighter.x = leftMargin + raw - raw / screan;
-        else
-            playerFighter.x = option.x - (raw / screan / 2);
 
-        if (option.y - raw / screan / 2 <= topMargin)
-            playerFighter.y = topMargin;
-        else if (option.y - raw / screan / 2 > topMargin + column - raw / screan)
-            playerFighter.y = topMargin + column - raw / screan;
-        else
-            playerFighter.y = option.y - (raw / screan / 2);
+        static int runSpeed;
+        static clock_t passed = 0;
+        static clock_t now = 0;
+
+// 开始刷新系统
+        if (mainTime.passedtime(flushTime)) {
+            //判断游戏是否结束了
+            if (enemys.empty() && checkpoint.nowTime == checkpoint.cd.size())
+                return true;
+
+            //计算运行频率
+            now = mainTime.getPassedTime();
+            runSpeed = 1000 / (now - passed);
+            passed = mainTime.getPassedTime();
 
 
-        //无论如何，让子弹飞一会儿
-        flyBullets(bullets);
-        //敌人随机移动
-        EnemyMove(enemys);
-        //间隔一段频率把玩家子弹加入刷新队列中
-        if (movetime != 0 && movetime % (flushTime * (100 / shootSpeed)) == 0) {
-            bullets.push_back(bulletFactory.getPlayerBullet(playerFighter.x, playerFighter.y - raw / screan, 0));
-            for (auto i = enemys.begin(); i < enemys.end(); i++) {
-                int c1 = bullets.size();
-                i->shoot(bullets, 1, bulletFactory.getEnemyBulletByType(i->x, i->y + 50, 0, 2));
-                int c2 = bullets.size();
+            //玩家飞机的位置 处理边缘情况
+            if (option.x - raw / screan / 2 <= leftMargin)
+                checkpoint.playerFighter.x = leftMargin;
+            else if (option.x - raw / screan / 2 >= leftMargin + raw - raw / screan)
+                checkpoint.playerFighter.x = leftMargin + raw - raw / screan;
+            else
+                checkpoint.playerFighter.x = option.x - (raw / screan / 2);
+
+            if (option.y - raw / screan / 2 <= topMargin)
+                checkpoint.playerFighter.y = topMargin;
+            else if (option.y - raw / screan / 2 > topMargin + column - raw / screan)
+                checkpoint.playerFighter.y = topMargin + column - raw / screan;
+            else
+                checkpoint.playerFighter.y = option.y - (raw / screan / 2);
+
+
+            //无论如何，让子弹飞一会儿
+            flyBullets(bullets);
+            //敌人随机移动
+            EnemyMove(enemys);
+            //间隔一段频率把玩家子弹加入刷新队列中
+            static Timer shootTimer;
+            if (shootTimer.passedtime(1500 / shootSpeed)) {
+                bullets.push_back(Bullet(0, bulletImages[1], checkpoint.playerFighter.x,
+                                         checkpoint.playerFighter.y - raw / screan, 0, -5, 5,
+                                         checkpoint.playerFighter.Attack));
+                for (auto i = enemys.begin(); i < enemys.end(); i++) {
+                    i->shoot(bullets, 1000);
+
+                }
+            }
+
+            if (_kbhit())        //键盘输入值时
+            {
+                int key;
+                key = _getch();
+                //空格
+                if (key == 32) {
+                }
+                //esc
+                if (key == 27) {
+                    closegraph();
+                    break;
+                }
+            }
+
+            //刷新敌人
+            if (flushEnemy(time, enemys, checkpoint)) {
+                return true;
+            }
+            //清理敌人
+            if (!clearEnemy(checkpoint)) {
+                cout << "game over!" << endl;
+                return false;
             }
         }
 
-        if (_kbhit())        //键盘输入值时
-        {
-            int key;
-            key = _getch();
-            //空格
-            if (key == 32) {
-                bullets.push_back(bulletFactory.getPlayerBullet(option.x - 120, option.y - 90, 0));
-                bullets.push_back(bulletFactory.getPlayerBullet(option.x + 20, option.y - 90, 0));
-            }
-            //esc
-            if (key == 27) {
-                closegraph();
-                break;
-            }
-        }
-
-        //刷新敌人
-        flushEnemy(time, enemys);
-        //清理敌人
-        if (!clearEnemy(playerFighter)) {
-            cout << "game over!" << endl;
-            return 0;
-        }
         //////////////////////////////////////////////////////////////////开始绘制//////////////////////////////////////////
-        cleardevice();//清理之前的内容
-        loadimage(&B,
-                  (path + "\\background1.png").c_str(),
-                  raw, column);
-        putimage(leftMargin, topMargin, &B);
+//计算帧数
+        static Timer mainScreanFlushTimer;
+        static int screanSpeed;
+        static clock_t screanpassed = 0;
+        static clock_t screannow = 0;
 
 
-        //加载玩家飞机
-        putimage(playerFighter.x, playerFighter.y, &playerFighter.picture);
+        if (mainScreanFlushTimer.passedtime(screanflushTime)) {
+            screannow = mainScreanFlushTimer.getPassedTime();
+            screanSpeed = 1000 / (screannow - screanpassed);
+            screanpassed = mainScreanFlushTimer.getPassedTime();
 
 
-        //加载敌人飞机
-        for (auto i = enemys.begin(); i < enemys.end(); i++) {
-            putimage(i->x, i->y, &i->picture);
-        }
+            cleardevice();//清理之前的内容
+            putimage(leftMargin, topMargin, &checkpoint.background);
+
+
+            //加载玩家飞机
+            putimage(checkpoint.playerFighter.x, checkpoint.playerFighter.y, &checkpoint.playerFighter.picture);
+
+
+            //加载敌人飞机
+            for (auto i = enemys.begin(); i < enemys.end(); i++) {
+                putimage(i->x, i->y, &i->picture);
+            }
 
 //输出剩余血量
-        settextcolor(0x0000AA);
-        settextstyle(2 * screan, 0, _T("Consolas"));
-        stringstream ss;
-        ss << playerFighter.HP;
-        string str;
-        ss >> str;
-        outtextxy(screan, topMargin, str.c_str());
+            settextcolor(0x0000AA);
+            settextstyle(screan * 1.5, 0, _T("Consolas"));
+            showDetails(screan, topMargin, checkpoint.playerFighter.HP, "HP:");
+            //输出运行频率
+            showDetails(screan, topMargin + screan * 2, (double) runSpeed / (1000 / flushTime), "模拟速率:");
+            //输出帧数
+            showDetails(screan, topMargin + screan * 4, screanSpeed, "帧数:");
+            //遍历容器 加载所有弹道
+            showBullets(bullets);
+            //执行未完成的绘制任务
+            FlushBatchDraw();
 
-
-        //遍历容器 加载所有弹道
-        showBullets(bullets);
-        //执行未完成的绘制任务
-        FlushBatchDraw();
-
+        }
     }
 }
 
@@ -190,25 +275,27 @@ void showBullets(vector<Bullet> &bs) {
     }
 }
 
-void flushEnemy(Timer &t, vector<Enemy> &ems) {
-    if (t.passedtime(enemyFreshTime)) {
-        for (int i = 0; i < enemyFreshCount; i++) {
-            IMAGE enemyFighter;//敌人飞机
-            loadimage(&enemyFighter, (path + "\\enemyfighter.png").c_str(), raw / screan,
-                      raw / screan);//加载敌人飞机
-            int X = leftMargin + rand() % raw;
-            int Y = topMargin + rand() % (column / 2);
-            Enemy n = Enemy();
-            n.x = X;
-            n.y = Y;
-            n.HP = 10;
-            n.movetoX = leftMargin + rand() % raw;
-            n.movetoY = topMargin + rand() % (column / 2);
-            n.speed = enemyMoveSpeed;
-            n.picture = enemyFighter;
-            ems.push_back(n);
+bool flushEnemy(Timer &t, vector<Enemy> &ems, Checkpoint &checkpoint) {
+
+    if (checkpoint.nowTime >= checkpoint.cd.size()) {
+        cout << "关卡敌人已经刷新完了" << endl;
+        if (enemys.empty()) {
+            cout << "恭喜获胜!" << endl;
+            return true;
         }
+        return false;
     }
+
+    if (t.passedtime(checkpoint.cd[checkpoint.nowTime] * 1000)) {
+
+        for (auto i = checkpoint.enemyGroup[checkpoint.nowTime].begin();
+             i < checkpoint.enemyGroup[checkpoint.nowTime].end();
+             i++) {
+            enemys.push_back(*i);
+        }
+        checkpoint.nowTime++;
+    }
+    return false;
 }
 
 void EnemyMove(vector<Enemy> &e) {
@@ -217,7 +304,7 @@ void EnemyMove(vector<Enemy> &e) {
     }
 }
 
-bool clearEnemy(PlayerFighter &playerFighter) {
+bool clearEnemy(Checkpoint &checkpoint) {
 
     for (auto j = bullets.begin(); j < bullets.end(); j++) {
         if (j->from == 0) {
@@ -246,25 +333,74 @@ bool clearEnemy(PlayerFighter &playerFighter) {
                 }
             }
         } else {
-            if (abs(j->x - playerFighter.x) < raw / screan && abs(j->y - playerFighter.y) < raw / screan) {
-                playerFighter.HP -= j->ATTACK;
+            if (abs(j->x - checkpoint.playerFighter.x) < raw / screan &&
+                abs(j->y - checkpoint.playerFighter.y) < raw / screan) {
+                checkpoint.playerFighter.HP -= j->ATTACK;
                 //要删除碰撞过的子弹
                 j = bullets.erase(j);
                 if (j > bullets.begin() && !bullets.empty()) {
                     j--;
                 } else {
                     //如果最后一发打死了玩家 则返回false
-                    if (playerFighter.isDead()) {
+                    if (checkpoint.playerFighter.isDead()) {
                         return false;
                     }
                     return true;
                 }
             }
             //判断玩家还有没有血
-            if (playerFighter.isDead()) {
+            if (checkpoint.playerFighter.isDead()) {
                 return false;
             }
         }
     }
     return true;
+}
+
+inline void showDetails(int x, int y, int cnt, string message) {
+    stringstream ss;
+    string str;
+    ss << message;
+    ss << cnt;
+    ss >> str;
+    //输出剩余血量
+    outtextxy(x, y, str.c_str());
+}
+
+inline void showDetails(int x, int y, double cnt, string message) {
+    stringstream ss;
+    string str;
+    ss << message;
+    ss << cnt;
+    ss >> str;
+    //输出剩余血量
+    outtextxy(x, y, str.c_str());
+}
+
+int menu() {
+    cleardevice();//清理之前的内容
+    settextcolor(0x0000AA);
+    settextstyle(screan * 2, 0, _T("Consolas"));
+    outtextxy(raw / 2, topMargin, "请选择关卡");
+
+    outtextxy(raw / 2 - 10 * screan, topMargin + 3 * screan, "关卡1");
+    outtextxy(raw / 2, topMargin + 3 * screan, "关卡2");
+    outtextxy(raw / 2 + 10 * screan, topMargin + 3 * screan, "关卡3");
+    FlushBatchDraw();
+    MOUSEMSG option;
+    while (true) {
+        PeekMouseMsg(&option, true);
+        if (option.uMsg == WM_LBUTTONUP) {
+            if (option.x >= raw / 2 - 10 * screan && option.x <= raw / 2 && option.y >= topMargin + 3 * screan &&
+                option.y <= topMargin + 5 * screan)
+                return 1;
+            else if (option.x > raw / 2 && option.x <= raw / 2 + 10 * screan && option.y >= topMargin + 3 * screan &&
+                     option.y <= topMargin + 5 * screan)
+                return 2;
+            else if (option.x > raw / 2 + 10 * screan && option.x <= raw / 2 + 20 * screan &&
+                     option.y >= topMargin + 3 * screan && option.y <= topMargin + 5 * screan)
+                return 3;
+        }
+    }
+
 }
