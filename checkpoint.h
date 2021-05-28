@@ -21,11 +21,11 @@ using namespace std;
 
 class Checkpoint {
 public:
-    PlayerFighter playerFighter;
-    IMAGE background;
-    vector<vector<Enemy>> enemyGroup;
-    vector<int> cd;
-    int nowTime = 0;
+    PlayerFighter playerFighter;//玩家飞机
+    IMAGE background;//关卡背景图
+    vector<vector<Enemy>> enemyGroup;//敌人刷新组
+    vector<int> cd;//每一组刷新的cd
+    int nowTime = 0;//现在刷新到第几组了
 
     Checkpoint(int c, EnemyFactory &enemyFactory) {
         if (c == 1) {
@@ -73,7 +73,7 @@ public:
 
 //关卡背景图片
             loadimage(&background,
-                      (MainPath + "\\background\\background1.png").c_str(),
+                      (MainPath + "\\background\\background2.png").c_str(),
                       raw, column);
             //设置刷新组 参数为间隔多少秒刷新这一组（从上一组开始）
             cd.push_back(0);
@@ -114,7 +114,7 @@ public:
             loadimage(&playerFighter.picture, (MainPath + "\\playerfighter.png").c_str(), raw / screan,
                       raw / screan);//加载玩家飞机图片
             loadimage(&background,
-                      (MainPath + "\\background\\background1.png").c_str(),
+                      (MainPath + "\\background\\background3.png").c_str(),
                       raw, column);
             cd.push_back(0);
             cd.push_back(5);

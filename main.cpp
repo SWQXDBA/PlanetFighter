@@ -8,8 +8,10 @@
 #include "sstream"
 #include "checkpoint.h"
 
+#include <direct.h>
+
 using namespace std;
-static string MainPath = "C:\\Users\\SWQXDBA2\\CLionProjects\\PlanetFighter\\icons";
+static string MainPath = "";
 static int raw = 1000;
 static int column = 750;
 static int screan = 20;// raw/screan作为图片的大小
@@ -42,12 +44,26 @@ bool clearEnemy(Checkpoint &checkpoint);//在循环中判断哪些敌人该被“杀死”或者受
 int menu();//显示菜单
 bool run(Checkpoint &checkpoint);//主程序
 static int flushTime = 1000 / 100;//用于控制整体运行速度。单位毫秒
-static int screanflushTime = 1000 / 60;//帧数上限 单位毫秒
+static int screanflushTime = 1000 / 90;//帧数上限 单位毫秒
 
 
 
 
 void init() {
+    //初始化工作路径
+    char *buffer;
+    //也可以将buffer作为输出参数
+    if((buffer = getcwd(nullptr, 0)) == nullptr)
+    {
+        perror("getcwd error");
+    }
+
+    stringstream  ss;
+    ss<<buffer;
+    ss<<"\\icons";
+    ss>>MainPath;
+
+
 //初始化弹道组
     IMAGE pi;
     loadimage(&pi, (MainPath + "\\bullet\\b1.png").c_str(), raw / screan, raw / screan);
@@ -97,6 +113,9 @@ int main() {
             }
         }
 
+        //清理上一把的内容
+        enemys.clear();
+        bullets.clear();
 
     }
 
@@ -238,8 +257,10 @@ bool run(Checkpoint &checkpoint) {
             showDetails(screan, topMargin, checkpoint.playerFighter.HP, "HP:");
             //输出运行频率
             showDetails(screan, topMargin + screan * 2, (double) runSpeed / (1000 / flushTime), "模拟速率:");
+            //输出运行频率
+            showDetails(screan, topMargin + screan * 4, runSpeed , "运行频率:");
             //输出帧数
-            showDetails(screan, topMargin + screan * 4, screanSpeed, "帧数:");
+            showDetails(screan, topMargin + screan * 6, screanSpeed, "帧数:");
             //遍历容器 加载所有弹道
             showBullets(bullets);
             //执行未完成的绘制任务
@@ -276,11 +297,10 @@ void showBullets(vector<Bullet> &bs) {
 }
 
 bool flushEnemy(Timer &t, vector<Enemy> &ems, Checkpoint &checkpoint) {
-
+//关卡中的刷新组都刷新过了
     if (checkpoint.nowTime >= checkpoint.cd.size()) {
-        cout << "关卡敌人已经刷新完了" << endl;
+        //关卡中的敌人都没了
         if (enemys.empty()) {
-            cout << "恭喜获胜!" << endl;
             return true;
         }
         return false;
