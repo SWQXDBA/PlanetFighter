@@ -86,21 +86,22 @@ public:
 
 class Enemy {
 public:
-    Timer shootTimer;
-    Timer moveTimer;
+    Timer shootTimer;//用于判断是否到了一个可以发射新子弹的时间
+    Timer moveTimer;//用于判断是否到可以移动的时间(每次移动到一个目的地的时候 会停留一会儿)
     IMAGE picture;
-    int x;
-    int y;
+    int x;//当前在游戏中的坐标
+    int y;//当前在游戏中的坐标
     int HP = 10;
-    int Attack;
-    int movetoX;
-    int movetoY;
-    int speed = 20;
-    vector<Bullet> myBullets;
+    int Attack;//子弹的攻击力
+    int movetoX;//当前想要前往的目标
+    int movetoY;//当前想要前往的目标
+    int speed = 20;//移动的速度
+    vector<Bullet> myBullets;//每次发射的子弹
 
     void move() {
-
+        //如果达到了目的地 则要选择下一个坐标
         if ((abs(movetoX - x) <= (raw / screan)) && (abs(movetoY - y) <= (raw / screan))) {
+            //判断是否停留了足够的时间 2s
             if (moveTimer.passedtime(2000)) {
                 movetoX = leftMargin + rand() % raw;
                 movetoY = topMargin + rand() % (column / 2);
@@ -108,7 +109,7 @@ public:
                 return;
             }
         }
-
+        //移动x
         if (abs(movetoX - x) > raw / screan) {
             if ((movetoX - x) >= 0) {
                 x += speed;
@@ -116,6 +117,7 @@ public:
                 x -= speed;
             }
         }
+        //移动y
         if (abs(movetoY - y) >= raw / screan) {
             if (movetoY - y > 0) {
                 y += speed;
@@ -130,7 +132,7 @@ public:
     bool isDead() {
         return HP <= 0;
     }
-
+        //发射子弹
     void shoot(vector<Bullet> &bullets, int time) {
         if (shootTimer.passedtime(time)) {
             for (auto i = myBullets.begin(); i < myBullets.end(); i++) {

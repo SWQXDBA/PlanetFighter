@@ -22,13 +22,13 @@ static int rightMargin = screan * 5 * 0;
 static int topMargin = screan * 5 * 0;
 static int bottomMargin = screan * 5 * 0;
 
-static vector<IMAGE> bulletImages;
-static vector<IMAGE> enemyEmages;
-static vector<Bullet> bullets;
-static vector<Enemy> enemys;
+static vector<IMAGE> bulletImages;//所有子弹的图标
+static vector<IMAGE> enemyEmages;//所有敌人的图标
+static vector<Bullet> bullets;//当前游戏中存在的所有子弹
+static vector<Enemy> enemys;//当前游戏中存在的所有敌人
 static EnemyFactory *enemyFactory;
 static int shootSpeed = 7;//玩家子弹发射速度 0-100 同时影响子弹飞行的速度
-static int enemyMoveSpeed = 2;//越大敌人移动得越快
+static int enemyMoveSpeed = 2;//越大敌人移动得越快，同时影响敌人子弹飞行的速度
 
 
 
@@ -53,15 +53,14 @@ void init() {
     //初始化工作路径
     char *buffer;
     //也可以将buffer作为输出参数
-    if((buffer = getcwd(nullptr, 0)) == nullptr)
-    {
+    if ((buffer = getcwd(nullptr, 0)) == nullptr) {
         perror("getcwd error");
     }
 
-    stringstream  ss;
-    ss<<buffer;
-    ss<<"\\icons";
-    ss>>MainPath;
+    stringstream ss;
+    ss << buffer;
+    ss << "\\icons";
+    ss >> MainPath;
 
 
 //初始化弹道组
@@ -131,7 +130,6 @@ bool run(Checkpoint &checkpoint) {
               (MainPath + "\\background1.png").c_str(),
               raw, column);
     putimage(leftMargin, topMargin, &B);
-    //关卡
 
 
     Timer time;
@@ -141,7 +139,7 @@ bool run(Checkpoint &checkpoint) {
 //主逻辑循环
 
     while (true) {
-
+        //程序主计时器
         static Timer mainTime;
 
         //接收鼠标信号
@@ -187,31 +185,31 @@ bool run(Checkpoint &checkpoint) {
             flyBullets(bullets);
             //敌人随机移动
             EnemyMove(enemys);
-            //间隔一段频率把玩家子弹加入刷新队列中
+            //把子弹加入刷新队列中
             static Timer shootTimer;
             if (shootTimer.passedtime(1500 / shootSpeed)) {
-                bullets.push_back(Bullet(0, bulletImages[1], checkpoint.playerFighter.x,
+                bullets.emplace_back(0, bulletImages[1], checkpoint.playerFighter.x,
                                          checkpoint.playerFighter.y - raw / screan, 0, -5, 5,
-                                         checkpoint.playerFighter.Attack));
+                                         checkpoint.playerFighter.Attack);
                 for (auto i = enemys.begin(); i < enemys.end(); i++) {
                     i->shoot(bullets, 1000);
 
                 }
             }
-
-            if (_kbhit())        //键盘输入值时
-            {
-                int key;
-                key = _getch();
-                //空格
-                if (key == 32) {
-                }
-                //esc
-                if (key == 27) {
-                    closegraph();
-                    break;
-                }
-            }
+//
+//            if (_kbhit())        //键盘输入值时
+//            {
+//                int key;
+//                key = _getch();
+//                //空格
+//                if (key == 32) {
+//                }
+//                //esc
+//                if (key == 27) {
+//                    closegraph();
+//                    break;
+//                }
+//            }
 
             //刷新敌人
             if (flushEnemy(time, enemys, checkpoint)) {
@@ -219,7 +217,6 @@ bool run(Checkpoint &checkpoint) {
             }
             //清理敌人
             if (!clearEnemy(checkpoint)) {
-                cout << "game over!" << endl;
                 return false;
             }
         }
@@ -258,7 +255,7 @@ bool run(Checkpoint &checkpoint) {
             //输出运行频率
             showDetails(screan, topMargin + screan * 2, (double) runSpeed / (1000 / flushTime), "模拟速率:");
             //输出运行频率
-            showDetails(screan, topMargin + screan * 4, runSpeed , "运行频率:");
+            showDetails(screan, topMargin + screan * 4, runSpeed, "运行频率:");
             //输出帧数
             showDetails(screan, topMargin + screan * 6, screanSpeed, "帧数:");
             //遍历容器 加载所有弹道

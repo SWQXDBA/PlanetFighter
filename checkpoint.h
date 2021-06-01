@@ -65,7 +65,7 @@ public:
             es3.push_back(enemyFactory.getEnemy(1));
             es3.push_back(enemyFactory.getEnemy(1));
             enemyGroup.push_back(es3);
-        }else if (c == 2) {
+        } else if (c == 2) {
             //生成玩家飞机
             playerFighter = PlayerFighter(150, 4);
             loadimage(&playerFighter.picture, (MainPath + "\\playerfighter.png").c_str(), raw / screan,
