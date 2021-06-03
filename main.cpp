@@ -3,7 +3,6 @@
 #include <conio.h>
 #include "vector"
 #include <windows.h>
-#include "iterator"
 #include "model.h"
 #include "sstream"
 #include "checkpoint.h"
@@ -303,7 +302,7 @@ bool flushEnemy(Timer &t, vector<Enemy> &ems, Checkpoint &checkpoint) {
         return false;
     }
 
-    if (t.passedtime(checkpoint.cd[checkpoint.nowTime] * 1000)) {
+    if (t.passedtime(checkpoint.cd[checkpoint.nowTime] * 1000)||enemys.empty()) {
 
         for (auto i = checkpoint.enemyGroup[checkpoint.nowTime].begin();
              i < checkpoint.enemyGroup[checkpoint.nowTime].end();

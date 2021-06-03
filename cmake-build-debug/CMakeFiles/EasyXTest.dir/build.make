@@ -38,19 +38,19 @@ NULL=nul
 SHELL = cmd.exe
 
 # The CMake executable.
-CMAKE_COMMAND = C:\Users\SWQXDBA\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\203.7148.70\bin\cmake\win\bin\cmake.exe
+CMAKE_COMMAND = C:\Users\SWQXDBA2\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\203.7148.70\bin\cmake\win\bin\cmake.exe
 
 # The command to remove a file.
-RM = C:\Users\SWQXDBA\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\203.7148.70\bin\cmake\win\bin\cmake.exe -E rm -f
+RM = C:\Users\SWQXDBA2\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\203.7148.70\bin\cmake\win\bin\cmake.exe -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = C:\Users\SWQXDBA\CLionProjects\EasyXTest
+CMAKE_SOURCE_DIR = C:\Users\SWQXDBA2\CLionProjects\PlanetFighter
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = C:\Users\SWQXDBA\CLionProjects\EasyXTest\cmake-build-debug
+CMAKE_BINARY_DIR = C:\Users\SWQXDBA2\CLionProjects\PlanetFighter\cmake-build-debug
 
 # Include any dependencies generated for this target.
 include CMakeFiles\EasyXTest.dir\depend.make
@@ -63,21 +63,21 @@ include CMakeFiles\EasyXTest.dir\flags.make
 
 CMakeFiles\EasyXTest.dir\main.cpp.obj: CMakeFiles\EasyXTest.dir\flags.make
 CMakeFiles\EasyXTest.dir\main.cpp.obj: ..\main.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\SWQXDBA\CLionProjects\EasyXTest\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/EasyXTest.dir/main.cpp.obj"
-	C:\PROGRA~2\MICROS~1.0\VC\bin\cl.exe @<<
- /nologo /TP $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) /FoCMakeFiles\EasyXTest.dir\main.cpp.obj /FdCMakeFiles\EasyXTest.dir\ /FS -c C:\Users\SWQXDBA\CLionProjects\EasyXTest\main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\SWQXDBA2\CLionProjects\PlanetFighter\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/EasyXTest.dir/main.cpp.obj"
+	E:\vs2013\VC\bin\cl.exe @<<
+ /nologo /TP $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) /FoCMakeFiles\EasyXTest.dir\main.cpp.obj /FdCMakeFiles\EasyXTest.dir\ /FS -c C:\Users\SWQXDBA2\CLionProjects\PlanetFighter\main.cpp
 <<
 
 CMakeFiles\EasyXTest.dir\main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/EasyXTest.dir/main.cpp.i"
-	C:\PROGRA~2\MICROS~1.0\VC\bin\cl.exe > CMakeFiles\EasyXTest.dir\main.cpp.i @<<
- /nologo /TP $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\SWQXDBA\CLionProjects\EasyXTest\main.cpp
+	E:\vs2013\VC\bin\cl.exe > CMakeFiles\EasyXTest.dir\main.cpp.i @<<
+ /nologo /TP $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\SWQXDBA2\CLionProjects\PlanetFighter\main.cpp
 <<
 
 CMakeFiles\EasyXTest.dir\main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/EasyXTest.dir/main.cpp.s"
-	C:\PROGRA~2\MICROS~1.0\VC\bin\cl.exe @<<
- /nologo /TP $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) /FoNUL /FAs /FaCMakeFiles\EasyXTest.dir\main.cpp.s /c C:\Users\SWQXDBA\CLionProjects\EasyXTest\main.cpp
+	E:\vs2013\VC\bin\cl.exe @<<
+ /nologo /TP $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) /FoNUL /FAs /FaCMakeFiles\EasyXTest.dir\main.cpp.s /c C:\Users\SWQXDBA2\CLionProjects\PlanetFighter\main.cpp
 <<
 
 # Object files for target EasyXTest
@@ -90,9 +90,9 @@ EasyXTest_EXTERNAL_OBJECTS =
 EasyXTest.exe: CMakeFiles\EasyXTest.dir\main.cpp.obj
 EasyXTest.exe: CMakeFiles\EasyXTest.dir\build.make
 EasyXTest.exe: CMakeFiles\EasyXTest.dir\objects1.rsp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\SWQXDBA\CLionProjects\EasyXTest\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable EasyXTest.exe"
-	C:\Users\SWQXDBA\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\203.7148.70\bin\cmake\win\bin\cmake.exe -E vs_link_exe --intdir=CMakeFiles\EasyXTest.dir --rc=C:\PROGRA~2\WI3CF2~1\8.1\bin\x86\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\8.1\bin\x86\mt.exe --manifests  -- C:\PROGRA~2\MICROS~1.0\VC\bin\link.exe /nologo @CMakeFiles\EasyXTest.dir\objects1.rsp @<<
- /out:EasyXTest.exe /implib:EasyXTest.lib /pdb:C:\Users\SWQXDBA\CLionProjects\EasyXTest\cmake-build-debug\EasyXTest.pdb /version:0.0  /machine:X86 /debug /INCREMENTAL /subsystem:console  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib 
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\SWQXDBA2\CLionProjects\PlanetFighter\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable EasyXTest.exe"
+	C:\Users\SWQXDBA2\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\203.7148.70\bin\cmake\win\bin\cmake.exe -E vs_link_exe --intdir=CMakeFiles\EasyXTest.dir --rc=C:\PROGRA~2\WI3CF2~1\8.1\bin\x86\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\8.1\bin\x86\mt.exe --manifests  -- E:\vs2013\VC\bin\link.exe /nologo @CMakeFiles\EasyXTest.dir\objects1.rsp @<<
+ /out:EasyXTest.exe /implib:EasyXTest.lib /pdb:C:\Users\SWQXDBA2\CLionProjects\PlanetFighter\cmake-build-debug\EasyXTest.pdb /version:0.0  /machine:X86 /debug /INCREMENTAL /subsystem:console  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib 
 <<
 
 # Rule to build all files generated by this target.
@@ -105,6 +105,6 @@ CMakeFiles\EasyXTest.dir\clean:
 .PHONY : CMakeFiles\EasyXTest.dir\clean
 
 CMakeFiles\EasyXTest.dir\depend:
-	$(CMAKE_COMMAND) -E cmake_depends "NMake Makefiles" C:\Users\SWQXDBA\CLionProjects\EasyXTest C:\Users\SWQXDBA\CLionProjects\EasyXTest C:\Users\SWQXDBA\CLionProjects\EasyXTest\cmake-build-debug C:\Users\SWQXDBA\CLionProjects\EasyXTest\cmake-build-debug C:\Users\SWQXDBA\CLionProjects\EasyXTest\cmake-build-debug\CMakeFiles\EasyXTest.dir\DependInfo.cmake --color=$(COLOR)
+	$(CMAKE_COMMAND) -E cmake_depends "NMake Makefiles" C:\Users\SWQXDBA2\CLionProjects\PlanetFighter C:\Users\SWQXDBA2\CLionProjects\PlanetFighter C:\Users\SWQXDBA2\CLionProjects\PlanetFighter\cmake-build-debug C:\Users\SWQXDBA2\CLionProjects\PlanetFighter\cmake-build-debug C:\Users\SWQXDBA2\CLionProjects\PlanetFighter\cmake-build-debug\CMakeFiles\EasyXTest.dir\DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles\EasyXTest.dir\depend
 

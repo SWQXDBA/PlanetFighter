@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-C:/Users/SWQXDBA/CLionProjects/EasyXTest/checkpoint.h
+C:/Users/SWQXDBA2/CLionProjects/PlanetFighter/checkpoint.h
 iostream
 -
 graphics.h
@@ -26,7 +26,7 @@ vector
 cmath
 -
 
-C:/Users/SWQXDBA/CLionProjects/EasyXTest/main.cpp
+C:/Users/SWQXDBA2/CLionProjects/PlanetFighter/main.cpp
 iostream
 -
 graphics.h
@@ -34,21 +34,21 @@ graphics.h
 conio.h
 -
 vector
-C:/Users/SWQXDBA/CLionProjects/EasyXTest/vector
+C:/Users/SWQXDBA2/CLionProjects/PlanetFighter/vector
 windows.h
 -
 iterator
-C:/Users/SWQXDBA/CLionProjects/EasyXTest/iterator
+C:/Users/SWQXDBA2/CLionProjects/PlanetFighter/iterator
 model.h
-C:/Users/SWQXDBA/CLionProjects/EasyXTest/model.h
+C:/Users/SWQXDBA2/CLionProjects/PlanetFighter/model.h
 sstream
-C:/Users/SWQXDBA/CLionProjects/EasyXTest/sstream
+C:/Users/SWQXDBA2/CLionProjects/PlanetFighter/sstream
 checkpoint.h
-C:/Users/SWQXDBA/CLionProjects/EasyXTest/checkpoint.h
+C:/Users/SWQXDBA2/CLionProjects/PlanetFighter/checkpoint.h
 direct.h
 -
 
-C:/Users/SWQXDBA/CLionProjects/EasyXTest/model.h
+C:/Users/SWQXDBA2/CLionProjects/PlanetFighter/model.h
 iostream
 -
 graphics.h
