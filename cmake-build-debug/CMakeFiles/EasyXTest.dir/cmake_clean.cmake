@@ -1,9 +1,10 @@
 file(REMOVE_RECURSE
   "CMakeFiles/EasyXTest.dir/main.cpp.obj"
+  "CMakeFiles/EasyXTest.dir/main.cpp.obj.d"
   "EasyXTest.exe"
   "EasyXTest.exe.manifest"
-  "EasyXTest.lib"
   "EasyXTest.pdb"
+  "libEasyXTest.dll.a"
 )
 
 # Per-language clean rules from dependency scanning.

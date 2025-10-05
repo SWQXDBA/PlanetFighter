@@ -10,24 +10,24 @@
 #include <direct.h>
 
 using namespace std;
-static string MainPath = "";
-static int raw = 1000;
-static int column = 750;
-static int screan = 20;// raw/screan×÷ÎªÍ¼Æ¬µÄ´óĞ¡
+string MainPath = "";
+int raw = 1000;
+int column = 750;
+int screan = 20;// raw/screanä½œä¸ºå›¾ç‰‡çš„å¤§å°
 
-//ÉèÖÃÍâ±ß¾à
-static int leftMargin = screan * 10;
-static int rightMargin = screan * 5 * 0;
-static int topMargin = screan * 5 * 0;
-static int bottomMargin = screan * 5 * 0;
+//è®¾ç½®å¤–è¾¹è·
+int leftMargin = screan * 10;
+int rightMargin = screan * 5 * 0;
+int topMargin = screan * 5 * 0;
+int bottomMargin = screan * 5 * 0;
 
-static vector<IMAGE> bulletImages;//ËùÓĞ×Óµ¯µÄÍ¼±ê
-static vector<IMAGE> enemyEmages;//ËùÓĞµĞÈËµÄÍ¼±ê
-static vector<Bullet> bullets;//µ±Ç°ÓÎÏ·ÖĞ´æÔÚµÄËùÓĞ×Óµ¯
-static vector<Enemy> enemys;//µ±Ç°ÓÎÏ·ÖĞ´æÔÚµÄËùÓĞµĞÈË
-static EnemyFactory *enemyFactory;
-static int shootSpeed = 7;//Íæ¼Ò×Óµ¯·¢ÉäËÙ¶È 0-100 Í¬Ê±Ó°Ïì×Óµ¯·ÉĞĞµÄËÙ¶È
-static int enemyMoveSpeed = 2;//Ô½´óµĞÈËÒÆ¶¯µÃÔ½¿ì£¬Í¬Ê±Ó°ÏìµĞÈË×Óµ¯·ÉĞĞµÄËÙ¶È
+vector<IMAGE> bulletImages;//æ‰€æœ‰å­å¼¹çš„å›¾æ ‡
+vector<IMAGE> enemyEmages;//æ‰€æœ‰æ•Œäººçš„å›¾æ ‡
+vector<Bullet> bullets;//å½“å‰æ¸¸æˆä¸­å­˜åœ¨çš„æ‰€æœ‰å­å¼¹
+vector<Enemy> enemys;//å½“å‰æ¸¸æˆä¸­å­˜åœ¨çš„æ‰€æœ‰æ•Œäºº
+EnemyFactory *enemyFactory;
+int shootSpeed = 7;//ç©å®¶å­å¼¹å‘å°„é€Ÿåº¦ 0-100 åŒæ—¶å½±å“å­å¼¹é£è¡Œçš„é€Ÿåº¦
+int enemyMoveSpeed = 2;//è¶Šå¤§æ•Œäººç§»åŠ¨å¾—è¶Šå¿«ï¼ŒåŒæ—¶å½±å“æ•Œäººå­å¼¹é£è¡Œçš„é€Ÿåº¦
 
 
 
@@ -35,23 +35,23 @@ inline void showDetails(int x, int y, int cnt, string message);
 
 inline void showDetails(int x, int y, double cnt, string message);
 
-void flyBullets(vector<Bullet> &bs);//ÔÚÑ­»·ÖĞ¸Ä±ä×Óµ¯µÄÎ»ÖÃ
-void showBullets(vector<Bullet> &bs);//ÏÔÊ¾×Óµ¯
-bool flushEnemy(Timer &t, vector<Enemy> &ems, Checkpoint &checkpoint);//Ë¢ĞÂĞÂµÄµĞÈË false:ÓÎÏ·»¹Î´½áÊø true:Íæ¼Ò»ñÊ¤
-void EnemyMove(vector<Enemy> &e);//ÔÚÑ­»·ÖĞ¸Ä±äµĞÈËµÄÎ»ÖÃ
-bool clearEnemy(Checkpoint &checkpoint);//ÔÚÑ­»·ÖĞÅĞ¶ÏÄÄĞ©µĞÈË¸Ã±»¡°É±ËÀ¡±»òÕßÊÜµ½ÉËº¦ Í¬Ê±ÇåËãÍæ¼ÒÊÜµ½µÄÉËº¦ Íæ¼ÒÃ»hpÊ±·µ»Øfalse
-int menu();//ÏÔÊ¾²Ëµ¥
-bool run(Checkpoint &checkpoint);//Ö÷³ÌĞò
-static int flushTime = 1000 / 100;//ÓÃÓÚ¿ØÖÆÕûÌåÔËĞĞËÙ¶È¡£µ¥Î»ºÁÃë
-static int screanflushTime = 1000 / 90;//Ö¡ÊıÉÏÏŞ µ¥Î»ºÁÃë
+void flyBullets(vector<Bullet> &bs);//åœ¨å¾ªç¯ä¸­æ”¹å˜å­å¼¹çš„ä½ç½®
+void showBullets(vector<Bullet> &bs);//æ˜¾ç¤ºå­å¼¹
+bool flushEnemy(Timer &t, vector<Enemy> &ems, Checkpoint &checkpoint);//åˆ·æ–°æ–°çš„æ•Œäºº false:æ¸¸æˆè¿˜æœªç»“æŸ true:ç©å®¶è·èƒœ
+void EnemyMove(vector<Enemy> &e);//åœ¨å¾ªç¯ä¸­æ”¹å˜æ•Œäººçš„ä½ç½®
+bool clearEnemy(Checkpoint &checkpoint);//åœ¨å¾ªç¯ä¸­åˆ¤æ–­å“ªäº›æ•Œäººè¯¥è¢«â€œæ€æ­»â€æˆ–è€…å—åˆ°ä¼¤å®³ åŒæ—¶æ¸…ç®—ç©å®¶å—åˆ°çš„ä¼¤å®³ ç©å®¶æ²¡hpæ—¶è¿”å›false
+int menu();//æ˜¾ç¤ºèœå•
+bool run(Checkpoint &checkpoint);//ä¸»ç¨‹åº
+static int flushTime = 1000 / 100;//ç”¨äºæ§åˆ¶æ•´ä½“è¿è¡Œé€Ÿåº¦ã€‚å•ä½æ¯«ç§’
+static int screanflushTime = 1000 / 90;//å¸§æ•°ä¸Šé™ å•ä½æ¯«ç§’
 
 
 
 
 void init() {
-    //³õÊ¼»¯¹¤×÷Â·¾¶
+    //åˆå§‹åŒ–å·¥ä½œè·¯å¾„
     char *buffer;
-    //Ò²¿ÉÒÔ½«buffer×÷ÎªÊä³ö²ÎÊı
+    //ä¹Ÿå¯ä»¥å°†bufferä½œä¸ºè¾“å‡ºå‚æ•°
     if ((buffer = getcwd(nullptr, 0)) == nullptr) {
         perror("getcwd error");
     }
@@ -62,7 +62,7 @@ void init() {
     ss >> MainPath;
 
 
-//³õÊ¼»¯µ¯µÀ×é
+//åˆå§‹åŒ–å¼¹é“ç»„
     IMAGE pi;
     loadimage(&pi, (MainPath + "\\bullet\\b1.png").c_str(), raw / screan, raw / screan);
     bulletImages.push_back(pi);
@@ -75,31 +75,31 @@ void init() {
 
 int main() {
     init();
-    // ³õÊ¼»¯»æÍ¼´°¿Ú
+    // åˆå§‹åŒ–ç»˜å›¾çª—å£
     initgraph(raw + leftMargin + rightMargin, column + topMargin + bottomMargin);
-    BeginBatchDraw();//¿ªÊ¼ÅúÁ¿»æÍ¼ ÓÃÓÚ»º´æ
+    BeginBatchDraw();//å¼€å§‹æ‰¹é‡ç»˜å›¾ ç”¨äºç¼“å­˜
     while (true) {
 
         Checkpoint checkpoint(menu(), *enemyFactory);
         if (run(checkpoint)) {
-            cleardevice();//ÇåÀíÖ®Ç°µÄÄÚÈİ
+            cleardevice();//æ¸…ç†ä¹‹å‰çš„å†…å®¹
             settextcolor(0x0000AA);
             settextstyle(screan * 2, 0, _T("Consolas"));
-            outtextxy(leftMargin, column / 2, "¹§Ï²»ñÊ¤ °´ÏÂ¿Õ¸ñ¼ÌĞøÓÎÏ·£¬esc¹Ø±ÕÓÎÏ·");
+            outtextxy(leftMargin, column / 2, "æ­å–œè·èƒœ æŒ‰ä¸‹ç©ºæ ¼ç»§ç»­æ¸¸æˆï¼Œescå…³é—­æ¸¸æˆ");
             FlushBatchDraw();
         } else {
-            cleardevice();//ÇåÀíÖ®Ç°µÄÄÚÈİ
+            cleardevice();//æ¸…ç†ä¹‹å‰çš„å†…å®¹
             settextcolor(0x0000AA);
             settextstyle(screan * 2, 0, _T("Consolas"));
-            outtextxy(leftMargin, column / 2, "ÄúÊ§°ÜÁË! °´ÏÂ¿Õ¸ñ¼ÌĞøÓÎÏ·£¬esc¹Ø±ÕÓÎÏ·");
+            outtextxy(leftMargin, column / 2, "æ‚¨å¤±è´¥äº†! æŒ‰ä¸‹ç©ºæ ¼ç»§ç»­æ¸¸æˆï¼Œescå…³é—­æ¸¸æˆ");
             FlushBatchDraw();
         }
         while (true) {
-            if (_kbhit())        //¼üÅÌÊäÈëÖµÊ±
+            if (_kbhit())        //é”®ç›˜è¾“å…¥å€¼æ—¶
             {
                 int key;
                 key = _getch();
-                //¿Õ¸ñ
+                //ç©ºæ ¼
                 if (key == 32) {
                     break;
                 }
@@ -111,7 +111,7 @@ int main() {
             }
         }
 
-        //ÇåÀíÉÏÒ»°ÑµÄÄÚÈİ
+        //æ¸…ç†ä¸Šä¸€æŠŠçš„å†…å®¹
         enemys.clear();
         bullets.clear();
 
@@ -123,7 +123,7 @@ int main() {
 bool run(Checkpoint &checkpoint) {
 
 
-    //¼ÓÔØ±³¾°Í¼
+    //åŠ è½½èƒŒæ™¯å›¾
     IMAGE B;
     loadimage(&B,
               (MainPath + "\\background1.png").c_str(),
@@ -135,13 +135,13 @@ bool run(Checkpoint &checkpoint) {
 
 
 
-//Ö÷Âß¼­Ñ­»·
+//ä¸»é€»è¾‘å¾ªç¯
 
     while (true) {
-        //³ÌĞòÖ÷¼ÆÊ±Æ÷
+        //ç¨‹åºä¸»è®¡æ—¶å™¨
         static Timer mainTime;
 
-        //½ÓÊÕÊó±êĞÅºÅ
+        //æ¥æ”¶é¼ æ ‡ä¿¡å·
         static MOUSEMSG option;
         while (MouseHit()) {
             PeekMouseMsg(&option, true);
@@ -152,19 +152,19 @@ bool run(Checkpoint &checkpoint) {
         static clock_t passed = 0;
         static clock_t now = 0;
 
-// ¿ªÊ¼Ë¢ĞÂÏµÍ³
+// å¼€å§‹åˆ·æ–°ç³»ç»Ÿ
         if (mainTime.passedtime(flushTime)) {
-            //ÅĞ¶ÏÓÎÏ·ÊÇ·ñ½áÊøÁË
+            //åˆ¤æ–­æ¸¸æˆæ˜¯å¦ç»“æŸäº†
             if (enemys.empty() && checkpoint.nowTime == checkpoint.cd.size())
                 return true;
 
-            //¼ÆËãÔËĞĞÆµÂÊ
+            //è®¡ç®—è¿è¡Œé¢‘ç‡
             now = mainTime.getPassedTime();
             runSpeed = 1000 / (now - passed);
             passed = mainTime.getPassedTime();
 
 
-            //Íæ¼Ò·É»úµÄÎ»ÖÃ ´¦Àí±ßÔµÇé¿ö
+            //ç©å®¶é£æœºçš„ä½ç½® å¤„ç†è¾¹ç¼˜æƒ…å†µ
             if (option.x - raw / screan / 2 <= leftMargin)
                 checkpoint.playerFighter.x = leftMargin;
             else if (option.x - raw / screan / 2 >= leftMargin + raw - raw / screan)
@@ -180,11 +180,11 @@ bool run(Checkpoint &checkpoint) {
                 checkpoint.playerFighter.y = option.y - (raw / screan / 2);
 
 
-            //ÎŞÂÛÈçºÎ£¬ÈÃ×Óµ¯·ÉÒ»»á¶ù
+            //æ— è®ºå¦‚ä½•ï¼Œè®©å­å¼¹é£ä¸€ä¼šå„¿
             flyBullets(bullets);
-            //µĞÈËËæ»úÒÆ¶¯
+            //æ•Œäººéšæœºç§»åŠ¨
             EnemyMove(enemys);
-            //°Ñ×Óµ¯¼ÓÈëË¢ĞÂ¶ÓÁĞÖĞ
+            //æŠŠå­å¼¹åŠ å…¥åˆ·æ–°é˜Ÿåˆ—ä¸­
             static Timer shootTimer;
             if (shootTimer.passedtime(1500 / shootSpeed)) {
                 bullets.emplace_back(0, bulletImages[1], checkpoint.playerFighter.x,
@@ -196,11 +196,11 @@ bool run(Checkpoint &checkpoint) {
                 }
             }
 //
-//            if (_kbhit())        //¼üÅÌÊäÈëÖµÊ±
+//            if (_kbhit())        //é”®ç›˜è¾“å…¥å€¼æ—¶
 //            {
 //                int key;
 //                key = _getch();
-//                //¿Õ¸ñ
+//                //ç©ºæ ¼
 //                if (key == 32) {
 //                }
 //                //esc
@@ -210,18 +210,18 @@ bool run(Checkpoint &checkpoint) {
 //                }
 //            }
 
-            //Ë¢ĞÂµĞÈË
+            //åˆ·æ–°æ•Œäºº
             if (flushEnemy(time, enemys, checkpoint)) {
                 return true;
             }
-            //ÇåÀíµĞÈË
+            //æ¸…ç†æ•Œäºº
             if (!clearEnemy(checkpoint)) {
                 return false;
             }
         }
 
-        //////////////////////////////////////////////////////////////////¿ªÊ¼»æÖÆ//////////////////////////////////////////
-//¼ÆËãÖ¡Êı
+        //////////////////////////////////////////////////////////////////å¼€å§‹ç»˜åˆ¶//////////////////////////////////////////
+//è®¡ç®—å¸§æ•°
         static Timer mainScreanFlushTimer;
         static int screanSpeed;
         static clock_t screanpassed = 0;
@@ -234,32 +234,32 @@ bool run(Checkpoint &checkpoint) {
             screanpassed = mainScreanFlushTimer.getPassedTime();
 
 
-            cleardevice();//ÇåÀíÖ®Ç°µÄÄÚÈİ
+            cleardevice();//æ¸…ç†ä¹‹å‰çš„å†…å®¹
             putimage(leftMargin, topMargin, &checkpoint.background);
 
 
-            //¼ÓÔØÍæ¼Ò·É»ú
+            //åŠ è½½ç©å®¶é£æœº
             putimage(checkpoint.playerFighter.x, checkpoint.playerFighter.y, &checkpoint.playerFighter.picture);
 
 
-            //¼ÓÔØµĞÈË·É»ú
+            //åŠ è½½æ•Œäººé£æœº
             for (auto i = enemys.begin(); i < enemys.end(); i++) {
                 putimage(i->x, i->y, &i->picture);
             }
 
-//Êä³öÊ£ÓàÑªÁ¿
+//è¾“å‡ºå‰©ä½™è¡€é‡
             settextcolor(0x0000AA);
             settextstyle(screan * 1.5, 0, _T("Consolas"));
             showDetails(screan, topMargin, checkpoint.playerFighter.HP, "HP:");
-            //Êä³öÔËĞĞÆµÂÊ
-            showDetails(screan, topMargin + screan * 2, (double) runSpeed / (1000 / flushTime), "Ä£ÄâËÙÂÊ:");
-            //Êä³öÔËĞĞÆµÂÊ
-            showDetails(screan, topMargin + screan * 4, runSpeed, "ÔËĞĞÆµÂÊ:");
-            //Êä³öÖ¡Êı
-            showDetails(screan, topMargin + screan * 6, screanSpeed, "Ö¡Êı:");
-            //±éÀúÈİÆ÷ ¼ÓÔØËùÓĞµ¯µÀ
+            //è¾“å‡ºè¿è¡Œé¢‘ç‡
+            showDetails(screan, topMargin + screan * 2, (double) runSpeed / (1000 / flushTime), "æ¨¡æ‹Ÿé€Ÿç‡:");
+            //è¾“å‡ºè¿è¡Œé¢‘ç‡
+            showDetails(screan, topMargin + screan * 4, runSpeed, "è¿è¡Œé¢‘ç‡:");
+            //è¾“å‡ºå¸§æ•°
+            showDetails(screan, topMargin + screan * 6, screanSpeed, "å¸§æ•°:");
+            //éå†å®¹å™¨ åŠ è½½æ‰€æœ‰å¼¹é“
             showBullets(bullets);
-            //Ö´ĞĞÎ´Íê³ÉµÄ»æÖÆÈÎÎñ
+            //æ‰§è¡Œæœªå®Œæˆçš„ç»˜åˆ¶ä»»åŠ¡
             FlushBatchDraw();
 
         }
@@ -272,7 +272,7 @@ void flyBullets(vector<Bullet> &bs) {
     for (auto i = bs.begin(); i < bs.end(); i++) {
         i->bulletFly();
     }
-    //ÇåÀí´¥ÅöÁËÆÁÄ»±ßÔµµÄ×Óµ¯
+    //æ¸…ç†è§¦ç¢°äº†å±å¹•è¾¹ç¼˜çš„å­å¼¹
     for (auto i = bs.begin(); i < bs.end(); i++) {
         if (i->x < leftMargin || i->x > leftMargin + raw || i->y < topMargin ||
             i->y > topMargin + column - raw / screan) {
@@ -293,9 +293,9 @@ void showBullets(vector<Bullet> &bs) {
 }
 
 bool flushEnemy(Timer &t, vector<Enemy> &ems, Checkpoint &checkpoint) {
-//¹Ø¿¨ÖĞµÄË¢ĞÂ×é¶¼Ë¢ĞÂ¹ıÁË
+//å…³å¡ä¸­çš„åˆ·æ–°ç»„éƒ½åˆ·æ–°è¿‡äº†
     if (checkpoint.nowTime >= checkpoint.cd.size()) {
-        //¹Ø¿¨ÖĞµÄµĞÈË¶¼Ã»ÁË
+        //å…³å¡ä¸­çš„æ•Œäººéƒ½æ²¡äº†
         if (enemys.empty()) {
             return true;
         }
@@ -325,12 +325,12 @@ bool clearEnemy(Checkpoint &checkpoint) {
     for (auto j = bullets.begin(); j < bullets.end(); j++) {
         if (j->from == 0) {
             for (auto i = enemys.begin(); i < enemys.end(); i++) {
-                //ÅĞ¶Ï×²»÷
+                //åˆ¤æ–­æ’å‡»
                 if (abs(j->x - i->x) < raw / screan && abs(j->y - i->y) < raw / screan) {
-                    //½øĞĞ¿ÛÑª
+                    //è¿›è¡Œæ‰£è¡€
                     i->HP -= j->ATTACK;
                     if (i->isDead()) {
-                        //Èç¹ûÃ»ÑªÁË É¾³ı
+                        //å¦‚æœæ²¡è¡€äº† åˆ é™¤
                         i = enemys.erase(i);
                         if (i > enemys.begin() && !enemys.empty()) {
                             i--;
@@ -339,7 +339,7 @@ bool clearEnemy(Checkpoint &checkpoint) {
                         }
                     }
                     j = bullets.erase(j);
-                    //ÒªÉ¾³ıÅö×²¹ıµÄ×Óµ¯
+                    //è¦åˆ é™¤ç¢°æ’è¿‡çš„å­å¼¹
                     if (j > bullets.begin() && !bullets.empty()) {
                         j--;
                     } else {
@@ -352,19 +352,19 @@ bool clearEnemy(Checkpoint &checkpoint) {
             if (abs(j->x - checkpoint.playerFighter.x) < raw / screan &&
                 abs(j->y - checkpoint.playerFighter.y) < raw / screan) {
                 checkpoint.playerFighter.HP -= j->ATTACK;
-                //ÒªÉ¾³ıÅö×²¹ıµÄ×Óµ¯
+                //è¦åˆ é™¤ç¢°æ’è¿‡çš„å­å¼¹
                 j = bullets.erase(j);
                 if (j > bullets.begin() && !bullets.empty()) {
                     j--;
                 } else {
-                    //Èç¹û×îºóÒ»·¢´òËÀÁËÍæ¼Ò Ôò·µ»Øfalse
+                    //å¦‚æœæœ€åä¸€å‘æ‰“æ­»äº†ç©å®¶ åˆ™è¿”å›false
                     if (checkpoint.playerFighter.isDead()) {
                         return false;
                     }
                     return true;
                 }
             }
-            //ÅĞ¶ÏÍæ¼Ò»¹ÓĞÃ»ÓĞÑª
+            //åˆ¤æ–­ç©å®¶è¿˜æœ‰æ²¡æœ‰è¡€
             if (checkpoint.playerFighter.isDead()) {
                 return false;
             }
@@ -379,7 +379,7 @@ inline void showDetails(int x, int y, int cnt, string message) {
     ss << message;
     ss << cnt;
     ss >> str;
-    //Êä³öÊ£ÓàÑªÁ¿
+    //è¾“å‡ºå‰©ä½™è¡€é‡
     outtextxy(x, y, str.c_str());
 }
 
@@ -389,19 +389,19 @@ inline void showDetails(int x, int y, double cnt, string message) {
     ss << message;
     ss << cnt;
     ss >> str;
-    //Êä³öÊ£ÓàÑªÁ¿
+    //è¾“å‡ºå‰©ä½™è¡€é‡
     outtextxy(x, y, str.c_str());
 }
 
 int menu() {
-    cleardevice();//ÇåÀíÖ®Ç°µÄÄÚÈİ
+    cleardevice();//æ¸…ç†ä¹‹å‰çš„å†…å®¹
     settextcolor(0x0000AA);
     settextstyle(screan * 2, 0, _T("Consolas"));
-    outtextxy(raw / 2, topMargin, "ÇëÑ¡Ôñ¹Ø¿¨");
+    outtextxy(raw / 2, topMargin, "è¯·é€‰æ‹©å…³å¡");
 
-    outtextxy(raw / 2 - 10 * screan, topMargin + 3 * screan, "¹Ø¿¨1");
-    outtextxy(raw / 2, topMargin + 3 * screan, "¹Ø¿¨2");
-    outtextxy(raw / 2 + 10 * screan, topMargin + 3 * screan, "¹Ø¿¨3");
+    outtextxy(raw / 2 - 10 * screan, topMargin + 3 * screan, "å…³å¡1");
+    outtextxy(raw / 2, topMargin + 3 * screan, "å…³å¡2");
+    outtextxy(raw / 2 + 10 * screan, topMargin + 3 * screan, "å…³å¡3");
     FlushBatchDraw();
     MOUSEMSG option;
     while (true) {
